@@ -1,0 +1,103 @@
+---
+title: "Lab 5 / Final Project"
+author: "Christopher Hainzl"
+date: "2023-05-03"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(DescTools)
+```
+
+# Introduction
+
+For as long as I can remember, I have been a huge fan of the NFL (my favorite team being the New York Giants), and always wanted to do an analysis on what factors seem to have the most impact on the probability of an interception happening. Through the years that I have spent watching games, the factors which, to me, seemed to have the greatest effect are:
+
+- The current quarter of the game
+- The amount of yards to go before the end zone is reached
+- If a timeout was called or not
+
+# Collecting & Preparing the Data:
+
+To perform this analysis, I will be using the "Detailed NFL Play-by-Play Data 2009-2018"
+dataset collected off of Kaggle:
+
+https://www.kaggle.com/datasets/maxhorowitz/nflplaybyplay2009to2016
+
+```{r}
+library(readr)
+library(dplyr)
+footballdata <- read_csv("C:/Users/hainz/OneDrive/2023 Spring/Applied Statistics (MATH370-01)/Final Project/NFL Play by Play 2009-2018 (v5).csv")
+```
+
+```{r}
+colnames(footballdata)
+```
+The columns that I want to consider for this analysis are:
+
+- interception = indicating if the pass was intercepted or not (response)
+- qtr = indicating the current quarter of the game (predictor #1)
+- ydstogo = indicating the amount of yards to go to the end zone (predictor #2)
+- timeout = indicating if a timeout was called on a play or not (predictor #3)
+
+```{r}
+# Check for missing values
+sum(is.na(footballdata$interception))
+sum(is.na(footballdata$qtr))
+sum(is.na(footballdata$ydstogo))
+sum(is.na(footballdata$timeout))
+```
+However, there are some missing values in the "timeout" and "interception" columns, which I will have to account for prior to setting up my analysis.
+
+```{r}
+footballdata["timeout"][is.na(footballdata["timeout"])] <- 0
+footballdata["interception"][is.na(footballdata["interception"])] <- 0
+```
+
+```{r}
+# Make sure that there are no more missing values in the columns
+# that are being considered
+sum(is.na(footballdata$interception))
+sum(is.na(footballdata$qtr))
+sum(is.na(footballdata$ydstogo))
+sum(is.na(footballdata$timeout))
+```
+
+To make it easier for us to keep track, I will be storing my fixed data in a new variable named "footballdata_cleaned".
+```{r}
+footballdata_cleaned <- footballdata
+```
+
+# Analysis
+
+```{r}
+unique(footballdata_cleaned$interception)
+```
+
+Since all the values presented in the interception column are either 0 or 1, I will be setting up a logistic regression that predicts if an interception will be made based on the predictor variables listed in the section titled "Collecting & Preparing The Data". I will also be working with a 95% confidence level when interpreting the model.
+
+```{r}
+footballmodel <- glm(interception~qtr+ydstogo+timeout, data = footballdata_cleaned, family = "binomial")
+summary(footballmodel)
+```
+
+# Model Parameter Interpretations and Estimates
+Starting at a value of approximately e^(-5.41), or 0.004 (B0):
+
+- The probability of an interception increases by a factor of e^(0.119), or approximately 1.13, for each unit increase in the current quarter of the game. (B1)
+- The probability of an interception increases by a factor of e^(0.067), or approximately 1.07, for each unit increase in the amount of yards to go in order to reach the end zone. (B2)
+- The probability of an interception decreases by a factor of e^(-1.289), or approximately 0.276, if a timeout is called on a play. (B3)
+
+When working with a 95% confidence level, the p-values associated with each of the predictor variables indicate that they are all significant predictors, and none of them should be removed from the model (their p-values are all less than .05). However, whether or not it is safe to conclude that this is true will depend on what the pseudo-r^2 value tells us.
+
+# Checking How Well My Model Fits the Data
+
+```{r}
+# Use PseudoR2 function to determine the McFadden pseudo-r^2 value for the logistic regression.
+PseudoR2(footballmodel)
+```
+McFadden says that a pseudo-r^2 value higher than 0.2 indicates that the model fits the data very well (cited from: https://datascience.oneoffcoder.com/psuedo-r-squared-logistic-regression.html). Because the computed pseudo-r^2 value is less than 0.2, I would say that this model is not a good fit for the data.
+
+# Conclusions
+Based on the computed pseudo-rˆ2 value, I would say that the model used for this analysis was not good. I also think that the overall analysis was affected by how I had to account for missing values. Therefore, it is not safe to assume that all of the predictor variables being considered for this analysis are significant predictors of whether or not an interception will happen.

@@ -1,0 +1,135 @@
+---
+title: "Lab 1"
+author: "Christopher Hainzl"
+date: "2023-02-04"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+```{r}
+library(ggplot2)
+library(dplyr)
+```
+## Question 1
+
+
+```{r}
+noises <- c(55.3, 55.3, 55.3, 55.9, 55.9, 55.9, 55.9, 56.1, 56.1, 56.1, 56.1,
+56.1, 56.1, 56.8, 56.8, 57.0, 57.0, 57.0, 57.8, 57.8, 57.8, 57.9,
+57.9, 57.9, 58.8, 58.8, 58.8, 59.8, 59.8, 59.8, 62.2, 62.2, 63.8,
+63.8, 63.8, 63.9, 63.9, 63.9, 64.7, 64.7, 64.7, 65.1, 65.1, 65.1,
+65.3, 65.3, 65.3, 65.3, 67.4, 67.4, 67.4, 67.4, 68.7, 68.7, 68.7,
+68.7, 69.0, 70.4, 70.4, 71.2, 71.2, 71.2, 73.0, 73.0, 73.1, 73.1,
+74.6, 74.6, 74.6, 74.6, 79.3, 79.3, 79.3, 79.3, 83.0, 83.0, 83.0)
+```
+
+```{r}
+# Compute sample mean, median, standard deviation and inter-quartile range for noise data.
+mean(noises)
+```
+
+```{r}
+median(noises)
+```
+
+```{r}
+sd(noises)
+```
+
+```{r}
+IQR(noises)
+```
+```{r}
+# Generate histogram and boxplot
+hist(noises, xlab = "Noise Level (dBA)", ylab = "Amount", col = "yellow", main = "Noise Level Counts")
+```
+```{r}
+boxplot(noises, xlab = "Noise Level (dBA)", col = "red", main = "Noise Level Counts",
+horizontal = TRUE)
+```
+The mean and median of the data are approximately 64.89 and 64.7, respectively. The standard deviation and inter-quartile range of the data are approximately 7.80 and 12.6, respectively.
+The histogram appears to be bimodal and indicates that the data is right-skewed. The boxplot suggests that there are no outliers.
+
+# Question 2
+
+# Question 2a
+```{r}
+# Compute sample standard deviation
+sd(airquality$Ozone, na.rm = TRUE)
+```
+```{r}
+# Compute sample mean
+mean(airquality$Ozone, na.rm = TRUE)
+```
+
+```{r}
+# Generate horizontal boxplot
+boxplot(airquality$Ozone, xlab = "Ozone Measurements", col = "red", main = "Ozone Level Counts", 
+        horizontal = TRUE)
+```
+The standard deviation of the ozone data is approximately 33.00, while the sample mean is approximately 42.13. The boxplot shows that there are 2 outliers in the ozone data.
+
+
+# Question 2b
+```{r}
+ozone_norm <- rnorm(200, mean(airquality$Ozone, na.rm = TRUE), sd(airquality$Ozone, na.rm = TRUE))
+temp_norm <- rnorm(200, mean(airquality$Temp, na.rm = TRUE), sd(airquality$Temp, na.rm = TRUE))
+boxplot(airquality$Ozone, ozone_norm, airquality$Temp, temp_norm,
+main = "Multiple Boxplots for Comparison Between Temperature and Ozone",
+at = c(1,2,4,5),
+names = c("Ozone", "Normal", "Temp", "Normal"),
+las = 2,
+col = c("orange","red"),
+border = "brown",
+horizontal = TRUE,
+notch = TRUE)
+```
+
+# Question 2c
+Only the temperature data appears to have been approximately drawn from a normal distribution.
+
+# Question 2d
+```{r}
+# Generate a boxplot for each month in the data
+ggplot(data = airquality, aes(x = Month, y = Temp, group = Month)) +
+  geom_boxplot(fill = "green") +
+       labs(
+         title = "Temperatures for Each Month",
+         x = "Month",
+         y = "Temperature (Degrees Fahrenheit)"
+       ) +
+  coord_flip()
+```
+
+```{r}
+june <- airquality %>% filter(airquality$Month == 6)
+summary(june$Temp)
+```
+
+```{r}
+IQR(june$Temp)
+```
+
+```{r}
+july <- airquality %>% filter(airquality$Month == 7)
+summary(july$Temp)
+```
+```{r}
+IQR(july$Temp)
+boxplot.stats(july$Temp)$out
+```
+
+# Question 2e
+Using the boxplots, I observed the following:
+
+- The month of September appeared to have the most normal distribution compared to the others.
+
+- The difference in temperature appears to be most significant between the months of May and July.
+
+- There was more variance in temperature when considering every month except July.
+
+- There are outliers present only in the data for the months of June and July. June has two outliers, which are 65 and 93. July also has two outliers, which are 73 and 74.

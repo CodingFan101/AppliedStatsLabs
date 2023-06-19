@@ -1,0 +1,119 @@
+---
+title: "Lab 4"
+author: "Christopher Hainzl"
+date: "2023-04-18"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(readr)
+```
+
+
+
+```{r}
+healthdata <- read_csv("lab4data(1).csv")
+healthdata
+```
+- Weight (lbs) = The measured weight, in pounds, of each subject.
+- Height (in.) = The measured height, in inches, of each subject.
+- Protein = The protein intake of each subject.
+- Carbohydrates = The carbohydrate intake of each subject.
+- Calcium = The calcium intake of each subject.
+- Gender = The gender of each subject (1 = male, 0 = female)
+- Calories = The amount of calories consumed by each subject.
+
+
+The most appropriate way to begin this analysis would be to set up a linear regression model that predicts a subject's caloric intake based on weight, height, protein, carbohydrates, calcium, and gender. While setting up this model, the assumptions are made
+that the model's residuals will be normally distributed
+and that the variances are equal. We will also be working with a 95% confidence 
+level.
+
+```{r}
+# Model 1 - All predictors included
+healthmodel1 <- lm(Calories~Weight+Height+Protein+Carbohydrates+Calcium+
+gender, data = healthdata)
+summary(healthmodel1)
+```
+- For each unit increase in the subject's weight, their caloric intake increases 
+by approximately 1.25 on average. (B1)
+- For each unit increase in the subject's height, their caloric intake increases
+by approximately 3.01 on average. (B2)
+- For each unit increase in the amount of protein consumed by the subject,
+their caloric intake increases by approximately 13.43 on average. (B3)
+- For each unit increase in the amount of carbohydrates consumed by the subject,
+their caloric intake increases by approximately 4.59 on average. (B4)
+- For each unit increase in the amount of calcium consumed by the subject,
+their caloric intake decreases by approximately 0.24 on average. (B5)
+- For the subjects that are males, their caloric intake decreases by
+approximately 70.03 on average when compared to females. (B6)
+
+However, based on the p-values associated with each of these predictors, the only
+ones that appear to be significant when working with a 95% confidence level are
+protein, carbohydrates, and calcium. The p-values associated with each of those
+predictors are all less than .05.
+
+Therefore, we should try removing each of the non-significant predictors one at
+a time and determine if the relationship between caloric intake and each of the
+predictors changes.
+
+```{r}
+# Model 2 - Remove weight
+healthmodel2 <- lm(Calories~Height+Protein+Carbohydrates+Calcium+
+gender, data = healthdata)
+summary(healthmodel2)
+```
+After removing weight, the p-values for all the predictor variables changed,
+but the amounts of protein, carbohydrates, and calcium consumed by the subject
+still remain the most significant predictors of their caloric intake.
+
+```{r}
+# Model 3 - Remove height
+healthmodel3 <- lm(Calories~Protein+Carbohydrates+Calcium+
+gender, data = healthdata)
+summary(healthmodel3)
+```
+After removing height from our model, protein, carbohydrates, and calcium 
+still remain the most significant predictors when working with a 95% confidence
+level.
+
+```{r}
+# Model 4 - Remove gender
+healthmodel4 <- lm(Calories~Protein+Carbohydrates+Calcium, data = healthdata)
+summary(healthmodel4)
+```
+Now that all the non-significant predictors have been removed, we can determine
+how well our final model fits the original data and if our model assumptions
+are met.
+
+```{r}
+# Residual Plot - test to see if variances are equal
+plot(healthmodel4$residuals ~ predict(healthmodel4), 
+     main = "Residual Plot", xlab = "Fitted Values",
+     ylab = "Residual Values")
+```
+
+```{r}
+# Use shapiro.test() function to see if residuals are normally distributed
+shapiro.test(healthmodel4$residuals)
+```
+
+Our final, simplified model helps us draw the following conclusions:
+
+Starting at a value of approximately 27.09:
+
+- For each unit increase in how much protein each subject consumes, their average caloric intake will increase by approximately 13.30.
+- For each unit increase in how much carbohydrates the subject consumes, 
+their average caloric intake will increase by approximately 4.63.
+- For each unit increase in how much calcium each subject consumes, their
+average caloric intake will decrease by approximately 0.23.
+- Weight, height, and gender do not help with predicting the caloric intake
+of a subject.
+
+Since the p-value associated with the Shapiro-Wilk test is greater than .05, and
+the graph labeled Residual Plot does not show any particular pattern (it looks like a random cloud centered at 0), this means that our model assumptions are satisfied. And because the value of R-squared (0.9295) is close to 1, this means that our final model fits the data very well and that a linear model was appropriate to use
+for this analysis.
+
+Therefore, we can also be certain that all of the conclusions which were drawn using
+our final model are correct.

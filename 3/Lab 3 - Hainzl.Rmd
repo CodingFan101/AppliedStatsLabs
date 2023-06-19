@@ -1,0 +1,77 @@
+---
+title: "Lab 3"
+author: "Christopher Hainzl"
+date: "2023-03-30"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+curetime <- c(rep("3", 6), rep("6", 6), rep("9", 6))
+levels <- c("1", "1", "2", "2", "3", "3")
+adhesive <- c(rep(levels, 6))
+material <- c(rep("Copper", 18), rep("Nickel", 18))
+bondstrength <- c(72.7, 80, 77.8, 75.3, 77.3, 76.5, 74.6, 77.5, 78.5, 81.1, 80.9, 82.6, 80, 82.7, 84.6, 78.3, 83.9, 85, 74.7, 77.4, 79.3, 77.8, 77.2, 78.4, 75.7, 78.2, 78.8, 75.4, 84.5, 77.5, 77.2, 74.6, 83, 83.9, 89.4, 81.2)
+bonddata <- data.frame("Cure time" = curetime, "Adhesive" = adhesive, "Material" = material, 
+"Bond strength" = bondstrength)
+```
+
+In this experiment, we will be testing to see which of the following three factors have an effect on bond strength: cure time, adhesive type, and material. We will also be testing to see if the interactions between these factors have an effect on bond strength as well. While conducting the experiment, we will be working with a 95% confidence level.
+
+```{r}
+# ANOVA table 1 - show all possible effects
+aovone <- aov(Bond.strength~Cure.time*Adhesive*Material, data = bonddata)
+summary(aovone)
+```
+Based on the p-values presented in our initial ANOVA table, only cure time and adhesive type appear to have an effect on the bond strength, and neither material nor any of the interactions between our factors seem to impact the strength. The three-way interaction between the factors also did not have an impact. Therefore, we will have to remove the three-way interaction to see if anything changes.
+
+```{r}
+# ANOVA table 2 - remove three-way interaction
+aovtwo <- aov(Bond.strength~Cure.time+Adhesive+Material+Cure.time:Adhesive+
+Cure.time:Material+Adhesive:Material, data = bonddata)
+summary(aovtwo)
+```
+
+The p-values do not change by much after removing the three-way interaction between the factors. This is to be expected since the three-way interaction had no impact on bond strength. But since the p-values for the two-way interactions are still larger than .05, we will have to remove them one at a time (depending on which one has the largest p-value) and see if anything changes.
+
+```{r}
+# ANOVA table 3 - remove interaction between cure time and material
+summary(aov(Bond.strength~Cure.time+Adhesive+Material+Cure.time:Adhesive+
+              Adhesive:Material, data = bonddata))
+```
+
+```{r}
+# ANOVA table 4 - remove interaction between adhesive and material
+summary(aov(Bond.strength~Cure.time+Adhesive+Material+Cure.time:Adhesive, 
+            data = bonddata))
+```
+
+```{r}
+# ANOVA table 5 - remove interaction between cure time and adhesive
+summary(aov(Bond.strength~Cure.time+Adhesive+Material, data = bonddata))
+```
+```{r}
+# Final ANOVA table - remove material
+finalaov <- aov(Bond.strength~Cure.time+Adhesive, data = bonddata)
+summary(finalaov)
+```
+```{r}
+# Multiple comparisons analysis
+TukeyHSD(finalaov)
+```
+```{r}
+# Assumption checking - check if residuals are normally distributed
+qqnorm(finalaov$residuals)
+```
+
+Based on everything we have done, we can draw the following conclusions:
+
+- The factors which had a significant impact on bond strength were cure time and adhesive type.
+- Neither material nor any of the interactions in question had a significant impact on bond strength. 
+- Going from a cure time of 3 minutes to a cure time of 9 minutes, as well as going from 6 to 9 minutes, had a significant impact on bond strength.
+- In the case of adhesive type, the only instance that seemed to have a significant impact on bond strength was going from type 1 to type 3.
+
+We can be certain that all of these conclusions are correct since the residuals for our final model appear to be normally distributed for the most part.

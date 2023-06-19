@@ -1,0 +1,86 @@
+---
+title: "lab_4"
+output: html_document
+date: "2023-04-17"
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## R Markdown
+
+
+```{r}
+# Load the required library
+library(readr)
+
+# Read the CSV file
+data <- read_csv("lab4data(1).csv")
+
+# Print the first few rows of the data to inspect its structure
+head(data)
+
+```
+subject
+weight
+height
+protein
+Carbohydrates
+Calcuim 
+gender (1=male , 0= female),Calories
+
+
+my linear regression model is as follows  Calories ~ Calcium + gender + Carbohydrates + Protein + 
+    Weight + Height, data = data) 
+
+
+```{r}
+# Load the required libraries
+library(dplyr)
+library(ggplot2)
+library(broom)
+
+# Read the CSV file
+data <- read.csv("lab4data(1).csv")
+
+
+
+
+## Including Plots
+head(data)
+
+
+```
+
+
+```{r}
+# Fit a linear regression model
+model <- lm(Calories ~ Calcium + gender + Carbohydrates + Protein + Weight + Height, data = data)
+
+# Print the model summary
+summary(model)
+```
+```{r}
+summary(model)
+```
+
+
+
+```{r}
+# Residual plot
+plot(model, which = 1)
+
+# Normal probability plot
+plot(model, which = 2)
+
+# Test for homoscedasticity (Breusch-Pagan test)
+
+# Test for normality of residuals (Shapiro-Wilk test)
+shapiro.test(resid(model))
+
+```
+
+
+
+Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
